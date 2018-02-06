@@ -4,3 +4,6 @@
 [submodule "dynet"]
 	path = dynet
 	url = git@github.com:clab/dynet.git
+[submodule "mkl-dnn"]
+	path = mkl-dnn
+	url = git@github.com:intel/mkl-dnn.git
