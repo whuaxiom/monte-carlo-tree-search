@@ -4,6 +4,8 @@ project(mcts)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS "-g -Wall -O3 -Wno-sign-compare -fpermissive")
 
-include_directories(${CMAKE_SOURCE_DIR}/include)
+include_directories(mcts/include)
+include_directories(tiny-dnn)
 
-add_executable(mcts src/main.cpp)
+add_executable(mcts mcts/src/main.cpp)
+add_executable(example_cifar10_train test/train.cpp)
