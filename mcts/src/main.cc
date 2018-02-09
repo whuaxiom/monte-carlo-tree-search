@@ -51,19 +51,20 @@ int play() {
   auto game = new Game(8, 8, 5);
 
   auto c_puct = 5.0;
-  auto n_simulation = 80000;
+  auto n_simulation = 16000;
 
   auto t0 = Clock::now();
   auto player = new MCTSSelfPlayer(c_puct, n_simulation, true);
 
-  std::vector<GameStates*> data_buffer;
   auto data = game->start_self_play(player, 1.0);
   auto t1 = Clock::now();
   auto run_time = elapsed_seconds(t1, t0);
-  std::cout << "data length: " << data->length << std::endl;
+  std::cout << "data length: " << data.samples_size() << std::endl;
   std::cout << "run_time: " << run_time << std::endl;
-  data_buffer.push_back(data);
   player->mcts->print_time();
+
+  std::string output_path = "./data/samples";
+  data.SerializeToString(&output_path);
 
   return 0;
 }

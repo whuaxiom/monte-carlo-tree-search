@@ -10,6 +10,8 @@
 #include "mcts_self_player.h"
 #include "data.h"
 
+#include "states.pb.h"
+
 class Game {
 public:
   Board* board = nullptr;
@@ -38,7 +40,8 @@ public:
     };
     auto current_player = 1;
     board->init_from_image(image, current_player);
-    auto data = new GameStates();
+
+    mcts::Samples data;
     while (true) {
       auto sensible_moves = board->get_legal_positions();
       if (sensible_moves.empty()) {
@@ -47,32 +50,39 @@ public:
 
       std::cout << "current_player: " << board->get_current_player() << " calculate move" << std::endl;
       board->print();
+
       auto tmp = player->get_action(board, temperature);
       auto move = tmp.first;
-      auto move_probability = tmp.second;
+      auto probability = tmp.second;
 
+      auto cur = data.add_samples();
       // store the data
-      data->length += 1;
-      data->states.push_back(board->get_current_state());
-      data->probability.push_back(move_probability);
-      data->current_players.push_back(board->get_current_player());
+      for (auto it : board->get_current_state()) {
+        cur->add_state(it);
+      }
+      for (auto it : probability) {
+        cur->add_probability(it);
+      }
+      cur->set_current_player(board->get_current_player());
+      cur->set_winner(0.0);
 
       std::cout << "player: " << board->get_current_player() << ", move at: " << move << std::endl;
+
       board->do_move(move);
       board->print();
       auto winner = board->has_a_winner();
+
       std::cout << "winner: " << winner << std::endl;
       if (winner >= 0) {
         // winner from the perspective of the current player of each state
-        data->winners.clear();
-        for (auto it : data->current_players) {
-          if (it == winner) data->winners.push_back(+1.0);
-          else data->winners.push_back(-1.0);
+        for (auto it = 0; it < data.samples_size(); ++it) {
+          auto mm = data.mutable_samples(it);
+          if (mm->current_player() == winner) mm->set_winner(+1.0);
+          else mm->set_winner(-1.0);
         }
         player->reset_player();
         break;
       }
-      break;
     }
     return data;
   }

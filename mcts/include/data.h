@@ -7,20 +7,18 @@
 
 #include "common.h"
 
-class GameStates {
+class GameState {
 public:
-  int length;
-  std::vector<tensor> states;
-  std::vector<std::vector<real_t>> probability;
-  std::vector<int> current_players;
-  std::vector<real_t> winners;
+  tensor state;
+  std::vector<real_t> probability;
+  int current_player;
+  double winner;
 
-  GameStates() {
-    length = 0;
-    states.clear();
+  GameState() {
+    state.clear();
     probability.clear();
-    current_players.clear();
-    winners.clear();
+    current_player = 0;
+    winner = 0.0;
   }
 };
 

@@ -13,7 +13,7 @@ private:
   unsigned width;
   unsigned n_in_row;
 
-  unsigned total_moves;
+  unsigned moves;
 
   int players[2] = {1, 2};
 
@@ -31,7 +31,7 @@ public:
     height = h;
     width = w;
     n_in_row = n;
-    total_moves = h * w;
+    moves = h * w;
     current_player = 0;
     last_move = -1;
   }
@@ -40,7 +40,7 @@ public:
     current_player = start_player;
     last_move = -1;
     states.clear();
-    for (auto it = 0; it < total_moves; ++it) {
+    for (auto it = 0; it < moves; ++it) {
       legal_positions.insert(it);
     }
   }
@@ -49,7 +49,7 @@ public:
     current_player = start_player;
     last_move = -1;
     states.clear();
-    for (auto it = 0; it < total_moves; ++it) {
+    for (auto it = 0; it < moves; ++it) {
       legal_positions.insert(it);
     }
     for (auto it = 0; it < height; ++it) {
@@ -97,27 +97,27 @@ public:
   }
 
   auto get_current_state() {
-    std::vector<std::vector<real_t>> res;
-    std::vector<real_t> current(total_moves, 0);
-    std::vector<real_t> opposite(total_moves, 0);
+    std::vector<real_t> res;
+    std::vector<real_t> current(moves, 0.0);
+    std::vector<real_t> opposite(moves, 0.0);
     for (auto it : states) {
       auto move = it.first;
       auto player = it.second;
       if (player == players[current_player]) current[move] = 1.0;
       else opposite[move] = 1.0;
     }
-    res.push_back(current);
-    res.push_back(opposite);
-    std::vector<real_t> last(total_moves, 0);
+    res.insert(res.end(), current.begin(), current.end());
+    res.insert(res.end(), opposite.begin(), opposite.end());
+    std::vector<real_t> last(moves, 0.0);
     if (last_move >= 0) {
       last[last_move] = 1.0;
     }
-    res.push_back(last);
-    std::vector<real_t> winner(total_moves, 0);
+    res.insert(res.end(), last.begin(), last.end());
+    std::vector<real_t> winner(moves, 0.0);
     if (states.size() % 2 == 0) {
       std::fill(winner.begin(), winner.end(), 1.0);
     }
-    res.push_back(winner);
+    res.insert(res.end(), winner.begin(), winner.end());
     return res;
   }
 
@@ -147,20 +147,14 @@ public:
           for (auto kt = 0; kt < 4; ++kt) {
             auto winner = player;
             for (auto nn = 0; nn < n_in_row; ++nn) {
-              auto xx = it + dir[kt][0] * nn;
-              auto yy = jt + dir[kt][1] * nn;
-              if (xx >= 0 && xx < height && yy >= 0 && yy < width) {
-                if (board[xx][yy] != player) {
-                  winner = -1;
-                  break;
-                }
-              }
-              else {
+              auto x = it + dir[kt][0] * nn;
+              auto y = jt + dir[kt][1] * nn;
+              if (x < 0 || x >= height || y < 0 || y >= width || board[x][y] != player) {
                 winner = -1;
                 break;
               }
             }
-            if (winner >= 0) {
+            if (winner > 0) {
               // std::cout << "winner: " << winner << ", it: " << it << ", jt: " << jt << ", dir: " << kt << std::endl;
               return winner;
             }
@@ -172,15 +166,23 @@ public:
   }
 
   auto has_a_winner() {
-    if (legal_positions.empty()) {
-      return 0;
-    }
     std::vector<std::vector<int>> board(height, std::vector<int>(width, 0));
     for (auto it : states) {
       auto h = it.first / width, w = it.first % width;
       board[h][w] = it.second;
     }
-    return check(board);
+    auto winner = check(board);
+    if (winner > 0) {
+      return winner;
+    }
+    else {
+      if (legal_positions.empty()) {
+        return 0; // tie
+      }
+      else {
+        return -1;
+      }
+    }
   }
 };
 
