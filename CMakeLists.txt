@@ -4,8 +4,29 @@ project(mcts)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS "-g -Wall -O3 -Wno-sign-compare -fpermissive")
 
-include_directories(mcts/include)
-include_directories(tiny-dnn)
+set(DEPS_DIR /usr/local)
 
-add_executable(mcts mcts/src/main.cpp)
-add_executable(example_cifar10_train test/train.cpp)
+set(PROTO_DIR ${CMAKE_SOURCE_DIR}/protobuf/proto)
+set(PROTO_CPP_DIR ${CMAKE_SOURCE_DIR}/protobuf/cpp)
+set(PROTO_PYTHON_DIR ${CMAKE_SOURCE_DIR}/protobuf/python)
+
+file(GLOB PROTO_FILES "${PROTO_DIR}/*.proto")
+execute_process(COMMAND ${DEPS_DIR}/bin/protoc --cpp_out=${PROTO_CPP_DIR} --proto_path=${PROTO_DIR} ${PROTO_FILES})
+execute_process(COMMAND ${DEPS_DIR}/bin/protoc --python_out=${PROTO_PYTHON_DIR} --proto_path=${PROTO_DIR} ${PROTO_FILES})
+
+include_directories(${PROTO_CPP_DIR})
+include_directories(${DEPS_DIR}/include)
+include_directories(${CMAKE_SOURCE_DIR}/mcts/include)
+
+# set(CMAKE_LIBRARY_PATH ${DEPS_DIR}/lib)
+find_library(GFLAGS libgflags.a ${DEPS_DIR}/lib)
+find_library(PROTOBUF libprotobuf.a ${DEPS_DIR}/lib)
+
+set(MODULE_LINKER_FLAGS ${GFLAGS} ${PROTOBUF})
+set(LINKER_FLAGS "-Wl,-static -static-libgcc -static-libstdc++")
+
+file(GLOB SRC_FILES "${PROTO_CPP_DIR}/*.cc" "mcts/src/*.cc")
+
+add_executable(search ${CMAKE_SOURCE_DIR}/mcts/src/main.cc)
+add_library(mcts ${SRC_FILES})
+target_link_libraries(search mcts ${LINKER_FLAGS} ${MODULE_LINKER_FLAGS})
