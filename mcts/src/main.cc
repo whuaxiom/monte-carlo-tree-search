@@ -51,7 +51,7 @@ int play() {
   auto game = new Game(8, 8, 5);
 
   auto c_puct = 5.0;
-  auto n_simulation = 16000;
+  auto n_simulation = 3000;
 
   auto t0 = Clock::now();
   auto player = new MCTSSelfPlayer(c_puct, n_simulation, true);
@@ -65,6 +65,7 @@ int play() {
 
   std::string output_path = "./data/samples";
   data.SerializeToString(&output_path);
+  std::cout << "job done" << std::endl;
 
   return 0;
 }
