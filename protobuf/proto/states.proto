@@ -1,0 +1,13 @@
+syntax = "proto2";
+package mcts;
+
+message State {
+  repeated double state = 1; // current, opposite, last_move, winner
+  repeated double probability = 2;
+  optional double winner = 3;
+  optional int32 current_player = 4;
+}
+
+message Samples {
+  repeated State samples = 1;
+}
