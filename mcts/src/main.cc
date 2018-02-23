@@ -1,5 +1,4 @@
 #include <iostream>
-#include <tuple>
 #include <vector>
 #include <random>
 
@@ -7,24 +6,6 @@
 #include "../include/data.h"
 #include "../include/mcts_self_player.h"
 #include "../include/game.h"
-
-std::tuple<bool, int> foo() {
-  return std::make_tuple(true, 1);
-}
-
-std::tuple<int, int> foo_tuple() {
-  return std::make_tuple(1, -1); // Always works
-}
-
-struct A { int a; A(int a_) : a(a_) {}; };
-
-auto func() { return std::make_tuple(A(1), 2, 3); }
-
-int test_tuple() {
-  auto [a, b, c] = func();
-  std::cout << a.a << ", " << b << ", " << c << std::endl;
-  return 0;
-}
 
 void test() {
   unsigned height = 8;
@@ -63,10 +44,34 @@ int play() {
   std::cout << "run_time: " << run_time << std::endl;
   player->mcts->print_time();
 
-  std::string output_path = "./data/samples";
-  data.SerializeToString(&output_path);
-  std::cout << "job done" << std::endl;
+  std::string output_path = "../data/samples.pb";
 
+  GOOGLE_PROTOBUF_VERIFY_VERSION;
+
+  // Write the new samples back to disk
+  std::fstream output(output_path, std::ios::out | std::ios::trunc | std::ios::binary);
+  if (!output) {
+    std::cout << output_path << ": File not found. Creating a new file" << std::endl;
+  }
+  else if (!data.SerializeToOstream(&output)) {
+    std::cerr << "Failed to write data" << std::endl;
+    return -1;
+  }
+  output.close(); // must close
+
+  mcts::Samples tmp;
+  // Read the existing samples
+  std::fstream input(output_path, std::ios::in | std::ios::binary);
+  if (!input) {
+    std::cout << output_path << ": File not found. Creating a new file" << std::endl;
+  } else if (!tmp.ParseFromIstream(&input)) {
+    std::cerr << "Failed to parse samples" << std::endl;
+    return -1;
+  }
+  input.close(); // must close
+  std::cout << "tmp data length: " << tmp.samples_size() << std::endl;
+
+  google::protobuf::ShutdownProtobufLibrary();
   return 0;
 }
 

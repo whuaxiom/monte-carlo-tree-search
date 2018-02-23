@@ -22,12 +22,6 @@ public:
   auto start_self_play(MCTSSelfPlayer* player, double temperature) {
     board->init_board();
     /*
-    std::vector<std::vector<int>> state = {
-        {1, 2, 1, 2, 1, 0}, {0, 1, 0, 2, 2, 1}, {0, 2, 0, 1, 1, 2}, {1, 1, 2, 0, 0, 2}, {2, 2, 0, 0, 1, 1}, {2, 2, 2, 1, 1, 1}
-    };
-    auto current_player = 1;
-    board->init_board(state, current_player);
-    */
     std::vector<std::string> image = {
         "00000000",
         "00021200",
@@ -40,7 +34,7 @@ public:
     };
     auto current_player = 1;
     board->init_from_image(image, current_player);
-
+    */
     mcts::Samples data;
     while (true) {
       auto sensible_moves = board->get_legal_positions();
@@ -83,6 +77,7 @@ public:
         player->reset_player();
         break;
       }
+      // break;
     }
     return data;
   }

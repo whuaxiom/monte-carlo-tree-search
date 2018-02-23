@@ -1,0 +1,8 @@
+google/protobuf/compiler/js/well_known_types_embed.lo: \
+ google/protobuf/compiler/js/well_known_types_embed.cc \
+ google/protobuf/compiler/js/well_known_types_embed.h \
+ /usr/local/Cellar/gcc/7.3.0/lib/gcc/7/gcc/x86_64-apple-darwin17.3.0/7.3.0/include/stddef.h
+
+google/protobuf/compiler/js/well_known_types_embed.h:
+
+/usr/local/Cellar/gcc/7.3.0/lib/gcc/7/gcc/x86_64-apple-darwin17.3.0/7.3.0/include/stddef.h:
